@@ -1,0 +1,63 @@
+service: ecommerce-api
+
+frameworkVersion: '4'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  environment:
+    DB_HOST: ${env:DB_HOST}
+    DB_PORT: ${env:DB_PORT}
+    DB_NAME: ${env:DB_NAME}
+    DB_USER: ${env:DB_USER}
+    DB_PASSWORD: ${env:DB_PASSWORD}
+
+functions:
+  # Products
+  getProducts:
+    handler: src/handlers/products/getProducts.handler
+    events:
+      - http:
+          path: products
+          method: GET
+          cors: true
+
+  createProduct:
+    handler: src/handlers/products/createProduct.handler
+    events:
+      - http:
+          path: products
+          method: POST
+          cors: true
+
+  # Orders
+  createOrder:
+    handler: src/handlers/orders/createOrder.handler
+    events:
+      - http:
+          path: orders
+          method: POST
+          cors: true
+
+  getOrders:
+    handler: src/handlers/orders/getOrders.handler
+    events:
+      - http:
+          path: orders
+          method: GET
+          cors: true
+
+  # Users
+  createUser:
+    handler: src/handlers/users/createUser.handler
+    events:
+      - http:
+          path: users
+          method: POST
+          cors: true
+
+plugins:
+  - serverless-offline
+  - serverless-esbuild
+  - serverless-plugin-tracing

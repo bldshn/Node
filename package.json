@@ -1,0 +1,13 @@
+{
+  "name": "ecommerce",
+  "private": true,
+  "scripts": {
+    "dev:web": "pnpm --filter web dev",
+    "dev:api": "pnpm --filter api dev",
+    "build:all": "pnpm --filter shared build && pnpm --filter web build && pnpm --filter api build",
+    "type-check": "pnpm -r type-check"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}
