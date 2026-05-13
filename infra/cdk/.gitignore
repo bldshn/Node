@@ -1,0 +1,27 @@
+# CDK asset staging directory
+.cdk.staging/
+cdk.out/
+
+# Parcel related files
+.cache/
+dist/
+
+# Jest coverage
+coverage/
+
+# Environment variables
+.env
+.env.local
+
+# Node modules
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

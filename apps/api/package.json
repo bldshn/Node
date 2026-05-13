@@ -2,5 +2,26 @@
   "name": "api",
   "version": "1.0.0",
   "private": true,
-  "scripts": {}
+  "scripts": {
+    "dev": "serverless offline",
+    "build": "esbuild src/**/*.ts --bundle --platform=node --target=node20 --external:aws-sdk --external:pg",
+    "deploy": "serverless deploy",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "aws-lambda": "^1.0.7",
+    "pg": "^8.11.3",
+    "dotenv": "^16.4.4"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.141",
+    "@types/node": "^20.10.6",
+    "@types/pg": "^8.11.4",
+    "typescript": "^5.4.0",
+    "esbuild": "^0.20.1",
+    "serverless": "^4.1.8",
+    "serverless-offline": "^13.3.4",
+    "serverless-esbuild": "^1.55.1",
+    "serverless-plugin-tracing": "^2.2.0"
+  }
 }

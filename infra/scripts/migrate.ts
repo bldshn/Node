@@ -1,31 +1,27 @@
-import { readFileSync } from 'fs';
-import { join } from 'path';
-import { Pool } from 'pg';
+#!/usr/bin/env ts-node
+/**
+ * Legacy migration script — use infra/scripts/runMigrations.ts instead
+ * This file is kept for backward compatibility.
+ */
+import { spawn } from 'child_process';
+import path from 'path';
 
-const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432', 10),
-  database: process.env.DB_NAME || 'ecommerce',
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'postgres',
+const runMigrationsPath = path.join(__dirname, 'runMigrations.ts');
+
+const child = spawn('ts-node', [runMigrationsPath], {
+  stdio: 'inherit',
+  env: {
+    ...process.env,
+    TS_NODE_PROJECT: path.join(__dirname, '../tsconfig.json'),
+  },
 });
 
-async function runMigrations() {
-  try {
-    console.log('Starting database migrations...');
+child.on('exit', (code) => {
+  process.exit(code || 0);
+});
 
-    const migrationPath = join(__dirname, '../../apps/api/src/db/migrations/001_initial_schema.sql');
-    const migrationSQL = readFileSync(migrationPath, 'utf-8');
+child.on('error', (error) => {
+  console.error('Failed to run migrations:', error);
+  process.exit(1);
+});
 
-    await pool.query(migrationSQL);
-
-    console.log('✅ Migrations completed successfully');
-  } catch (error) {
-    console.error('❌ Migration failed:', error);
-    process.exit(1);
-  } finally {
-    await pool.end();
-  }
-}
-
-runMigrations();

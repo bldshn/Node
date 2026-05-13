@@ -4,10 +4,17 @@
   "scripts": {
     "dev:web": "pnpm --filter web dev",
     "dev:api": "pnpm --filter api dev",
+    "dev:frontend": "pnpm --filter frontend dev",
     "build:all": "pnpm --filter shared build && pnpm --filter web build && pnpm --filter api build",
-    "type-check": "pnpm -r type-check"
+    "type-check": "pnpm -r type-check",
+    "cdk:synth": "pnpm --filter @ecommerce/infra-cdk synth",
+    "cdk:diff": "pnpm --filter @ecommerce/infra-cdk diff",
+    "cdk:deploy": "pnpm --filter @ecommerce/infra-cdk deploy",
+    "db:migrate": "ts-node infra/scripts/runMigrations.ts",
+    "db:migrate:local": "DB_HOST=localhost DB_PORT=5432 DB_NAME=ecommerce DB_USER=postgres DB_PASSWORD=postgres ts-node infra/scripts/runMigrations.ts"
   },
   "devDependencies": {
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "ts-node": "^10.9.2"
   }
 }

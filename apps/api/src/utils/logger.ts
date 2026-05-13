@@ -1,3 +1,8 @@
+// ─────────────────────────────────────────────────────────────
+// Structured CloudWatch logging for Lambda
+// Formats logs for parsing by CloudWatch Insights
+// ─────────────────────────────────────────────────────────────
+
 export enum LogLevel {
   DEBUG = 'DEBUG',
   INFO = 'INFO',
@@ -5,37 +10,125 @@ export enum LogLevel {
   ERROR = 'ERROR',
 }
 
-class Logger {
-  private logLevel: LogLevel = LogLevel.INFO;
+export interface LogContext {
+  requestId?: string;
+  userId?: string;
+  endpoint?: string;
+  [key: string]: any;
+}
 
-  setLogLevel(level: LogLevel) {
+class Logger {
+  private logLevel: LogLevel;
+  private context: LogContext = {};
+
+  constructor() {
+    const envLevel = process.env.LOG_LEVEL as LogLevel | undefined;
+    this.logLevel = envLevel || LogLevel.INFO;
+  }
+
+  /**
+   * Set the current log level.
+   */
+  setLogLevel(level: LogLevel): void {
     this.logLevel = level;
   }
 
-  debug(message: string, data?: unknown) {
+  /**
+   * Set persistent context for all subsequent logs.
+   * Useful for request ID, user ID, etc.
+   */
+  setContext(context: LogContext): void {
+    this.context = { ...this.context, ...context };
+  }
+
+  /**
+   * Clear the context.
+   */
+  clearContext(): void {
+    this.context = {};
+  }
+
+  /**
+   * Log at DEBUG level.
+   */
+  debug(message: string, data?: unknown): void {
     if (this.shouldLog(LogLevel.DEBUG)) {
-      console.log(`[DEBUG] ${message}`, data);
+      console.log(
+        JSON.stringify({
+          level: LogLevel.DEBUG,
+          message,
+          timestamp: new Date().toISOString(),
+          ...this.context,
+          ...(data && { data }),
+        })
+      );
     }
   }
 
-  info(message: string, data?: unknown) {
+  /**
+   * Log at INFO level.
+   */
+  info(message: string, data?: unknown): void {
     if (this.shouldLog(LogLevel.INFO)) {
-      console.log(`[INFO] ${message}`, data);
+      console.log(
+        JSON.stringify({
+          level: LogLevel.INFO,
+          message,
+          timestamp: new Date().toISOString(),
+          ...this.context,
+          ...(data && { data }),
+        })
+      );
     }
   }
 
-  warn(message: string, data?: unknown) {
+  /**
+   * Log at WARN level.
+   */
+  warn(message: string, data?: unknown): void {
     if (this.shouldLog(LogLevel.WARN)) {
-      console.warn(`[WARN] ${message}`, data);
+      console.warn(
+        JSON.stringify({
+          level: LogLevel.WARN,
+          message,
+          timestamp: new Date().toISOString(),
+          ...this.context,
+          ...(data && { data }),
+        })
+      );
     }
   }
 
-  error(message: string, error?: unknown) {
+  /**
+   * Log at ERROR level.
+   * Automatically extracts stack trace if error is an Error object.
+   */
+  error(message: string, error?: unknown): void {
     if (this.shouldLog(LogLevel.ERROR)) {
-      console.error(`[ERROR] ${message}`, error);
+      const errorData: Record<string, any> = {
+        level: LogLevel.ERROR,
+        message,
+        timestamp: new Date().toISOString(),
+        ...this.context,
+      };
+
+      if (error instanceof Error) {
+        errorData.errorMessage = error.message;
+        errorData.errorStack = error.stack;
+        errorData.errorName = error.name;
+      } else if (typeof error === 'object') {
+        errorData.error = error;
+      } else {
+        errorData.error = String(error);
+      }
+
+      console.error(JSON.stringify(errorData));
     }
   }
 
+  /**
+   * Determine if a log level should be output.
+   */
   private shouldLog(level: LogLevel): boolean {
     const levels = [LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARN, LogLevel.ERROR];
     const currentIndex = levels.indexOf(this.logLevel);
@@ -44,4 +137,6 @@ class Logger {
   }
 }
 
+// Singleton instance
 export const logger = new Logger();
+
